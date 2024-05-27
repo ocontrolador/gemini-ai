@@ -1,0 +1,8 @@
+.env
+.vscode
+*.json
+*.sh
+imagem/
+tmp/
+jsitor/
+log/
