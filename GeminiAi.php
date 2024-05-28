@@ -92,11 +92,36 @@ class GeminiAi
             throw new RuntimeException('Invalid API response: ' . json_encode($body));
         }
 
-        // salva historico
-        array_push($contents, [$body['candidates'][0]['content']]);
-        file_put_contents('contents.json',json_encode($contents),0);
-
+        // salva log
+        $this->saveLogChat($text, $contents, $body);
+        
         return [$body['candidates'][0]['content']['parts'][0]['text'], $body['usageMetadata']['totalTokenCount']];
+    }
+
+    private function saveLogChat(string $text, array $contents, array $body): void
+    {
+        $fileName = substr(trim($text), 0, 50);
+        $fileName = str_replace(" ", "-", $fileName);
+        $fileName = iconv('UTF-8', 'ASCII//TRANSLIT', $fileName);
+        $fileName = __DIR__ . '/log/' . $fileName .'.json';
+        // Verifica se o arquivo já existe
+        if (file_exists($fileName)) {
+          // Se existir, gera um novo nome com um sufixo numérico
+          $newFileName = $fileName;
+          $i = 1;
+          while (file_exists($newFileName)) {
+            $newFileName = str_replace(".json", "-$i.json", $fileName);
+            $i++;
+          }
+          $fileName = $newFileName;
+        }
+      
+
+        // Salvar
+        array_push($contents, [$body['candidates'][0]['content']]);
+        file_put_contents('contents.json',json_encode($contents),0); // salva local
+        file_put_contents($fileName,json_encode($contents),0); // salva no log
+        return;
     }
 
     private function getHttpErrorMessage(int $statusCode, string $response): string
