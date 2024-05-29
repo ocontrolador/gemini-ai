@@ -2,51 +2,60 @@
 <?php
 /*
 	ATCO Dias
-	12/05/2024
-	chat-historico.php Mostra os históricos
+	28/05/2024
+	log.php Mostra os log de Gemini
 */
 
-require 'vendor/autoload.php';
+require 'MarkdownToBash.php';
 
-use PhpPkg\CliMarkdown\CliMarkdown;
+$parser = new MarkdownToBash();
 
-$parser = new CliMarkdown;
+function dd(array $array):void 
+{
+  var_dump($array); 
+  exit();
+}
 
-// Lista os arquivos JSON na pasta "historico"
-$arquivos = scandir('historico');
-$jsonFiles = array_filter($arquivos, function ($arquivo) {
-    return pathinfo($arquivo, PATHINFO_EXTENSION) === 'json';
-});
+$diretorio = 'log';
+
+// Validar a existência do diretório
+if (!is_dir($diretorio)) {
+  throw new Exception("Diretório '$diretorio' não encontrado.");
+}
+
+// Listar os arquivos JSON no diretório
+$jsonFiles = glob("$diretorio/*.json");
+
+// Ordenar os arquivos por data inversa usando arrow function
+usort($jsonFiles, fn($a, $b) => filemtime($b) - filemtime($a));
 
 // Exibe os arquivos JSON disponíveis para seleção
-echo "Arquivos JSON na pasta 'historico':\n";
-foreach ($jsonFiles as $indice => $jsonFile) {
-    echo "- [$indice] $jsonFile\n";
-}
+echo "Arquivos JSON na pasta 'log':\n";
+foreach ($jsonFiles as $indice => $jsonFile)
+    echo "- [" . ($indice + 1). "] " . substr($jsonFile,strlen($diretorio) + 1) . PHP_EOL;
+
 
 // Solicita ao usuário que selecione um arquivo
 echo "Selecione um arquivo digitando o número correspondente:\n";
 $opcao = readline();
 
 // Verifica se a opção é válida
-if (!isset($jsonFiles[$opcao])) {
-    echo "Opção inválida.\n";
-    exit;
-}
+if (!isset($jsonFiles[$opcao - 1])) 
+    die("Opção inválida.\n");
 
 // Lê o conteúdo do arquivo selecionado
-$arquivoSelecionado = 'historico/' . $jsonFiles[$opcao];
-$jsonConteudo = file_get_contents($arquivoSelecionado);
+$jsonSelecionado = $jsonFiles[$opcao - 1];
+$jsonConteudo = file_get_contents($jsonSelecionado);
 
 // Converte o JSON para texto
 $arrayConteudo = json_decode($jsonConteudo, true);
-array_splice($arrayConteudo,0,2); // remover os dois primeiro
+array_shift($arrayConteudo); // o primeiro
 $texto = '';
-foreach ($arrayConteudo as $item) {
+foreach ($arrayConteudo as $item) {    
     $agente = ($item['role'] == 'user')? '# 🤷 - ': '> 🤖 - ';
-    $texto .= $agente . $item['text'] . "\n\n";
+    $texto .= $agente . $item['parts'][0]['text'] . "\n\n";
 }
 
 // Exibe o texto no terminal Linux
-echo $parser->render($texto);
+echo $parser->convert($texto);
 

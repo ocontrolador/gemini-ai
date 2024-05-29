@@ -118,7 +118,7 @@ class GeminiAi
       
 
         // Salvar
-        array_push($contents, [$body['candidates'][0]['content']]);
+        array_push($contents, $body['candidates'][0]['content']);
         file_put_contents('contents.json',json_encode($contents),0); // salva local
         file_put_contents($fileName,json_encode($contents),0); // salva no log
         return;
