@@ -100,7 +100,7 @@ class GeminiAi
 
     private function saveLogChat(string $text, array $contents, array $body): void
     {
-        $fileName = substr(trim($text), 0, 50);
+        $fileName = substr(trim($text), 0, 100);
         $fileName = str_replace(" ", "-", $fileName);
         $fileName = iconv('UTF-8', 'ASCII//TRANSLIT', $fileName);
         $fileName = __DIR__ . '/log/' . $fileName .'.json';

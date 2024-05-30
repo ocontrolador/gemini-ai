@@ -31,9 +31,11 @@ usort($jsonFiles, fn($a, $b) => filemtime($b) - filemtime($a));
 
 // Exibe os arquivos JSON disponíveis para seleção
 echo "Arquivos JSON na pasta 'log':\n";
-foreach ($jsonFiles as $indice => $jsonFile)
-    echo "- [" . ($indice + 1). "] " . substr($jsonFile,strlen($diretorio) + 1) . PHP_EOL;
-
+foreach ($jsonFiles as $indice => $jsonFile) {
+    $tamDir = mb_strlen($diretorio) + 1;
+    $nomeJson = mb_substr($jsonFile, $tamDir, mb_strlen($jsonFile) - $tamDir - 5);
+    echo "- [" . ($indice + 1). "] " . str_replace('-',' ', $nomeJson) . PHP_EOL;
+}
 
 // Solicita ao usuário que selecione um arquivo
 echo "Selecione um arquivo digitando o número correspondente:\n";
