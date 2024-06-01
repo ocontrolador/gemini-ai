@@ -1,8 +1,17 @@
 <?php
+
+/**
+ * Classe para interação com a API Gemini.
+ */
 class GeminiAi
 {
     private $apiKey;
 
+    /**
+     * Construtor da classe.
+     *
+     * @param string $apiKey Chave API da API Gemini.
+     */
     public function __construct(string $apiKey)
     {
         if (empty($apiKey)) {
@@ -11,7 +20,21 @@ class GeminiAi
         $this->apiKey = $apiKey;
     }
 
-    public function generateContent(string $filePath, string $text, string $mimeType = '', array $safetySettings = [], array $contents = []): array
+    /**
+     * Gera conteúdo usando a API Gemini.
+     *
+     * @param string $filePath Caminho para um arquivo a ser anexado à requisição.
+     * @param string $text Texto de entrada para gerar conteúdo.
+     * @param string $mimeType Tipo MIME do arquivo, se aplicável.
+     * @param array $safetySettings Configurações de segurança para o conteúdo gerado.
+     * @param array $contents Conteúdo anterior da conversa.
+     *
+     * @return array Array contendo o conteúdo gerado e a contagem total de tokens.
+     *
+     * @throws InvalidArgumentException Se o texto de entrada ou o caminho do arquivo forem inválidos.
+     * @throws RuntimeException Se ocorrer um erro de conexão ou um erro na resposta da API.
+     */
+    public function generateContent(string $filePath = '', string $text, string $mimeType = '', array $safetySettings = [], array $contents = []): array
     {
         $model = "gemini-1.5-flash-latest";
 
@@ -19,14 +42,8 @@ class GeminiAi
             throw new InvalidArgumentException('Text cannot be empty.');
         }
 
-        $fileData = '';
-        if (!empty($filePath)) {
-            if (!file_exists($filePath) || !is_readable($filePath)) {
-                throw new InvalidArgumentException('File does not exist or is not readable: ' . $filePath);
-            }
-            $fileData = base64_encode(file_get_contents($filePath));
-        }
-        
+        $fileData = $this->getFileData($filePath, $mimeType);
+
         $contents[] = [
             'parts' => [
                 ['text' => $text]
@@ -38,33 +55,96 @@ class GeminiAi
 
         if (!empty($fileData)) {
             $contents[$i]['parts'][] = [
-                'inline_data' => [
-                    'mime_type' => $mimeType,
-                    'data' => $fileData
-                ]
+                'inline_data' => $fileData
             ];
         }
 
+        $safety = $this->getSafetySettings($safetySettings);
+
+        $candidates = ["contents" => $contents, "safetySettings" => $safety];
+
+        $candidatesJson = json_encode($candidates);
+
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$this->apiKey}";
+
+        $response = $this->makeRequest($url, $candidatesJson);
+
+        $body = json_decode($response, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new RuntimeException('JSON decode error: ' . json_last_error_msg());
+        }
+
+        if (!isset($body['candidates'][0]['content'])) {
+            throw new RuntimeException('Invalid API response: ' . json_encode($body));
+        }
+
+        // Salva log
+        $this->saveLogChat($text, $contents, $body);
+
+        return [$body['candidates'][0]['content']['parts'][0]['text'], $body['usageMetadata']['totalTokenCount']];
+    }
+
+    /**
+     * Obtem dados de um arquivo para anexar à requisição.
+     *
+     * @param string $filePath Caminho para o arquivo.
+     * @param string $mimeType Tipo MIME do arquivo.
+     *
+     * @return array Dados do arquivo formatados para a requisição.
+     *
+     * @throws InvalidArgumentException Se o arquivo não existir ou não for legível.
+     */
+    private function getFileData(string $filePath, string $mimeType): array
+    {
+        if (!empty($filePath)) {
+            if (!file_exists($filePath) || !is_readable($filePath)) {
+                throw new InvalidArgumentException('File does not exist or is not readable: ' . $filePath);
+            }
+            return [
+                'mime_type' => $mimeType,
+                'data' => base64_encode(file_get_contents($filePath))
+            ];
+        }
+        return [];
+    }
+
+    /**
+     * Formata as configurações de segurança para a requisição.
+     *
+     * @param array $safetySettings Configurações de segurança.
+     *
+     * @return array Configurações de segurança formatadas.
+     */
+    private function getSafetySettings(array $safetySettings): array
+    {
         $safety = [];
         foreach ($safetySettings as $key => $value) {
             $safety[] = [
                 'category' => $key,
                 'threshold' => $value
             ];
-        };
+        }
+        return $safety;
+    }
 
-        $candidates = ["contents" => $contents, "safetySettings" => $safety];  
-        
-        $candidatesJson = json_encode($candidates);
-        //file_put_contents('candidates.json', $candidatesJson,0);exit();
-
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$this->apiKey}";
-
+    /**
+     * Realiza uma requisição HTTP para a API Gemini.
+     *
+     * @param string $url URL da API.
+     * @param string $jsonData Dados da requisição em formato JSON.
+     *
+     * @return string Resposta da API.
+     *
+     * @throws RuntimeException Se ocorrer um erro de conexão ou um erro na resposta da API.
+     */
+    private function makeRequest(string $url, string $jsonData): string
+    {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($candidates));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
         $response = curl_exec($ch);
@@ -79,51 +159,21 @@ class GeminiAi
 
         if ($statusCode != 200) {
             $errorMessage = $this->getHttpErrorMessage($statusCode, $response);
-            echo "\e[31m" . $errorMessage . "\e[0m" . PHP_EOL; exit(1);
+            echo "\e[31m" . $errorMessage . "\e[0m" . PHP_EOL;
+            exit(1);
         }
 
-        $body = json_decode($response, true);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new RuntimeException('JSON decode error: ' . json_last_error_msg());
-        }
-
-        if (!isset($body['candidates'][0]['content'])) {
-            throw new RuntimeException('Invalid API response: ' . json_encode($body));
-        }
-
-        // salva log
-        $this->saveLogChat($text, $contents, $body);
-        
-        return [$body['candidates'][0]['content']['parts'][0]['text'], $body['usageMetadata']['totalTokenCount']];
+        return $response;
     }
 
-    private function saveLogChat(string $text, array $contents, array $body): void
-    {
-        $fileName = substr(trim($text), 0, 100);
-        $fileName = str_replace(" ", "-", $fileName);
-        $fileName = iconv('UTF-8', 'ASCII//TRANSLIT', $fileName);
-        $fileName = __DIR__ . '/log/' . $fileName .'.json';
-        // Verifica se o arquivo já existe
-        if (file_exists($fileName)) {
-          // Se existir, gera um novo nome com um sufixo numérico
-          $newFileName = $fileName;
-          $i = 1;
-          while (file_exists($newFileName)) {
-            $newFileName = str_replace(".json", "-$i.json", $fileName);
-            $i++;
-          }
-          $fileName = $newFileName;
-        }
-      
-
-        // Salvar
-        array_push($contents, $body['candidates'][0]['content']);
-        file_put_contents('contents.json',json_encode($contents),0); // salva local
-        file_put_contents($fileName,json_encode($contents),0); // salva no log
-        return;
-    }
-
+    /**
+     * Obtém uma mensagem de erro HTTP.
+     *
+     * @param int $statusCode Código de status HTTP.
+     * @param string $response Resposta da API.
+     *
+     * @return string Mensagem de erro.
+     */
     private function getHttpErrorMessage(int $statusCode, string $response): string
     {
         $responseBody = json_decode($response, true);
@@ -147,6 +197,38 @@ class GeminiAi
             default:
                 return 'HTTP Error ' . $statusCode . ': ' . $message;
         }
+    }
+
+    /**
+     * Salva o log da conversa em um arquivo JSON.
+     *
+     * @param string $text Texto de entrada para gerar conteúdo.
+     * @param array $contents Conteúdo anterior da conversa.
+     * @param array $body Resposta da API.
+     */
+    private function saveLogChat(string $text, array $contents, array $body): void
+    {
+        $fileName = substr(trim($text), 0, 100);
+        $fileName = str_replace(" ", "-", $fileName);
+        $fileName = iconv('UTF-8', 'ASCII//TRANSLIT', $fileName);
+        $fileName = __DIR__ . '/log/' . $fileName . '.json';
+
+        // Verifica se o arquivo já existe
+        if (file_exists($fileName)) {
+            // Se existir, gera um novo nome com um sufixo numérico
+            $newFileName = $fileName;
+            $i = 1;
+            while (file_exists($newFileName)) {
+                $newFileName = str_replace(".json", "-$i.json", $fileName);
+                $i++;
+            }
+            $fileName = $newFileName;
+        }
+
+        // Salva o log
+        array_push($contents, $body['candidates'][0]['content']);
+        file_put_contents('contents.json', json_encode($contents), 0); // salva local
+        file_put_contents($fileName, json_encode($contents), 0); // salva no log
     }
 }
 
