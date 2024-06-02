@@ -140,22 +140,21 @@ class GeminiAi
      */
     private function makeRequest(string $url, string $jsonData): string
     {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-        $response = curl_exec($ch);
-        $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $curlError = curl_error($ch);
-
-        curl_close($ch);
+        $options = array(
+            'http' => array(
+                'method' => 'POST',
+                'header' => 'Content-Type: application/json',
+                'content' => $jsonData
+            )
+        );
+        $context = stream_context_create($options);
+        $response = file_get_contents($url, false, $context);
 
         if ($response === false) {
-            throw new RuntimeException('cURL Error: ' . $curlError);
+            throw new RuntimeException('Error fetching data: ' . error_get_last()['message']);
         }
+
+        $statusCode =  intval(substr($http_response_header[0], 9, 3));
 
         if ($statusCode != 200) {
             $errorMessage = $this->getHttpErrorMessage($statusCode, $response);
@@ -207,14 +206,45 @@ class GeminiAi
      * @param array $body Resposta da API.
      */
     private function saveLogChat(string $text, array $contents, array $body): void
-    {
-        $fileName = substr(trim($text), 0, 100);
-        $fileName = str_replace(" ", "-", $fileName);
-        $fileName = iconv('UTF-8', 'ASCII//TRANSLIT', $fileName);
-        $fileName = __DIR__ . '/log/' . $fileName . '.json';
+    {    
+        // Salva contents.json local. Usado no chat
+        array_push($contents, $body['candidates'][0]['content']);
+        file_put_contents('contents.json', json_encode($contents), 0);
 
-        // Verifica se o arquivo já existe
-        if (file_exists($fileName)) {
+        // Salva no log
+        $fileName = $this->limpaNomeArquivo($text);
+        file_put_contents($fileName, json_encode($contents), 0);
+    }
+
+    /**
+     * Remove caracteres proibidos de um nome de arquivo.
+     * Remove espaços e  acentuação
+     * Limita o tamanho
+     * Verifica se já existe
+     *
+     * @param string $nomeArquivo O nome do arquivo a ser limpo.
+     * @return string O nome do arquivo limpo.
+    */
+   private function limpaNomeArquivo(string $nomeArquivo): string {
+       // Lista de caracteres proibidos
+       $caracteresProibidos = array('/', '\\', '?', '*', '"', '<', '>', '|', ':', "\t", "\n", "\r", " ", ",", "--");
+
+       // Remove espaços em branco e substitui caracteres proibidos por hífen
+       $arquivoLimpo = trim(str_replace($caracteresProibidos, '-', $nomeArquivo));
+
+       // Verificar se o nome do arquivo é válido
+       //if (!preg_match('/^[a-zA-Z0-9_\.\-]+$/', $arquivoLimpo))
+       //    die("Nome de arquivo inválido: $arquivoLimpo\n");
+      
+       // Limita e remove os acentos
+       $fileName = substr(trim($arquivoLimpo), 0, 100);
+       //$fileName = str_replace(" ", "-", $fileName);
+       $fileName = iconv('UTF-8', 'ASCII//TRANSLIT', $fileName);
+
+       $fileName = __DIR__ . '/log/' . $fileName . '.json';
+
+       // Verifica se o arquivo já existe
+       if (file_exists($fileName)) {
             // Se existir, gera um novo nome com um sufixo numérico
             $newFileName = $fileName;
             $i = 1;
@@ -223,12 +253,8 @@ class GeminiAi
                 $i++;
             }
             $fileName = $newFileName;
-        }
+       }
 
-        // Salva o log
-        array_push($contents, $body['candidates'][0]['content']);
-        file_put_contents('contents.json', json_encode($contents), 0); // salva local
-        file_put_contents($fileName, json_encode($contents), 0); // salva no log
-    }
+       return $fileName;
+   }
 }
-

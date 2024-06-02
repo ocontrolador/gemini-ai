@@ -1,33 +1,19 @@
 <?php
 
+require_once 'autoload.php';
+
+// Classe para converter Markdown para texto formatado para o terminal
 class MarkdownToBash
 {
-    // Códigos de cores ANSI
-    private $colors = array(
-        'black' => "\e[30m",
-        'red' => "\e[31m",
-        'green' => "\e[32m",
-        'yellow' => "\e[33m",
-        'blue' => "\e[34m",
-        'magenta' => "\e[35m",
-        'cyan' => "\e[36m",
-        'white' => "\e[37m",
-        'bg_black' => "\e[40m",
-        'bg_red' => "\e[41m",
-        'bg_green' => "\e[42m",
-        'bg_yellow' => "\e[43m",
-        'bg_blue' => "\e[44m",
-        'bg_magenta' => "\e[45m",
-        'bg_cyan' => "\e[46m",
-        'bg_white' => "\e[47m",
-        'reset' => "\e[0m",
-        'bold' => "\e[1m",
-        'underline' => "\e[4m",
-        'blink' => "\e[5m",
-        'reverse' => "\e[7m",
-        'hidden' => "\e[8m"
-    );
+    /**
+     * @var AnsiColors
+     */
+    private $colors;
 
+    public function __construct()
+    {
+        $this->colors = new AnsiColors();
+    }
 
     /**
      * Converte uma string Markdown para texto formatado para o terminal.
@@ -35,15 +21,14 @@ class MarkdownToBash
      * @param string $markdown O texto Markdown a ser convertido.
      * @return string O texto formatado para o terminal.
      */
-    private function convertString(string $markdown): string
+    private function formatMarkdownString(string $markdown): string
     {
         // Converter cabeçalhos
         $markdown = preg_replace_callback(
             '/^(#{1,6})\s+(.*?)\s*$/m',
             function ($matches) {
                 $level = strlen($matches[1]);
-                $color = $this->colors['bg_cyan'] . $this->colors['bold'];
-                return str_repeat('»', $level) . ' ' . $color . $matches[2] . $this->colors['reset'] . PHP_EOL;
+                return str_repeat('»', $level) . ' ' . $this->colors::BG_CYAN . $this->colors::BOLD . $matches[2] . $this->colors::RESET . PHP_EOL;
             },
             $markdown
         );
@@ -52,29 +37,42 @@ class MarkdownToBash
         $markdown = preg_replace_callback(
             '/^(\s*[-*+])\s+(.*?)$/m',
             function ($matches) {
-                return $this->colors['yellow'] . $matches[1] . ' ' . $matches[2] . $this->colors['reset'];
-            },
-            $markdown
-        );
-
-        $markdown = preg_replace_callback(
-            '/^(\d+\.)\s+(.*?)$/m',
-            function ($matches) {
-                return $this->colors['yellow'] . $matches[1] . ' ' . $matches[2] . $this->colors['reset'];
+                return $this->colors::YELLOW . $matches[1] . ' ' . $matches[2] . $this->colors::RESET;
             },
             $markdown
         );
 
         // Converter negrito e itálico
-        $markdown = preg_replace('/\*\*(.*?)\*\*/', $this->colors['bold'] . '$1' . $this->colors['reset'], $markdown);
-        $markdown = preg_replace('/\*(.*?)\*/', $this->colors['underline'] . '$1' . $this->colors['reset'], $markdown);
+        $markdown = preg_replace('/\*\*(.*?)\*\*/', $this->colors::BOLD . '$1' . $this->colors::RESET, $markdown);
+        $markdown = preg_replace('/\*(.*?)\*/', $this->colors::UNDERLINE . '$1' . $this->colors::RESET, $markdown);
 
         // Converter links
         $markdown = preg_replace_callback(
             '/\[(.*?)\]\((.*?)\)/',
             function ($matches) {
-                return $this->colors['underline'] . $matches[1] . $this->colors['reset'] . ' (' . $this->colors['blue'] . $matches[2] . $this->colors['reset'] . ')';
+                return $this->colors::UNDERLINE . $matches[1] . $this->colors::RESET . ' (' . $this->colors::BLUE . $matches[2] . $this->colors::RESET . ')';
             },
+            $markdown
+        );
+
+        // Converter tabelas
+        $markdown = preg_replace_callback(
+            '/^\|(.+)\|\s*$/m',
+            function ($matches) {
+                $rows = array_map('trim', explode('|', $matches[1]));
+                $output = '';
+                foreach ($rows as $row) {
+                    $output .= $this->colors::CYAN . str_pad($row, 15) . $this->colors::RESET;
+                }
+                return $output;
+            },
+            $markdown
+        );
+
+        // Converter linhas horizontais de tabelas
+        $markdown = preg_replace(
+            '/^\|(?:\s*:?-+:?\s*\|)+\s*$/m',
+            str_repeat('-', 15 * 5) . PHP_EOL,
             $markdown
         );
 
@@ -90,7 +88,7 @@ class MarkdownToBash
     public function convert(string $markdown): string
     {
         if (strpos($markdown, '```') === false) {
-            return $this->convertString($markdown);
+            return $this->formatMarkdownString($markdown);
         }
 
         $markdownArray = explode('```', $markdown);
@@ -98,20 +96,17 @@ class MarkdownToBash
 
         foreach ($markdownArray as $key => $value) {
             if ($key % 2 == 1) {
-                $bash .=  "\n" . $this->colors['bg_black'] . $this->colors['white'] . '👾 ' . $value . $this->colors['reset'] . "\n";
+                $bash .= "\n" . $this->colors::BG_BLACK . $this->colors::WHITE . '👾 ' . $value . $this->colors::RESET . "\n";
             } else {
-                $bash .= $this->convertString($value);
+                $bash .= $this->formatMarkdownString($value);
             }
         }
 
         return $bash;
     }
+    
+
+
 }
 
-/*
-// Exemplo de uso
-$markdownText = file_get_contents('resposta.md');
 
-$converter = new MarkdownToBash();
-echo $converter->convert($markdownText) . PHP_EOL;
-*/

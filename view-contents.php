@@ -6,10 +6,9 @@
 	Visualiza contents.json
 */
 
+require_once 'autoload.php';
 
-require 'dev-helpers.php'; # durante o desenvolvimento
-
-require 'MarkdownToBash.php';
+//require 'MarkdownToBash.php';
 $parser = new MarkdownToBash();
 
 $jsonFile = 'contents.json';
