@@ -8,10 +8,12 @@
 
 require_once 'autoload.php';
 
-//require 'MarkdownToBash.php';
+//use Diasdlasd\MarkdownToBash;
+
 $parser = new MarkdownToBash();
 
 $jsonFile = 'contents.json';
+$filename = (isset($argv[1]))? $argv[1] : null;
 
 // Verifica se exite e carrega
 if (!file_exists($jsonFile)) 
@@ -28,5 +30,5 @@ foreach ($arrayConteudo as $item) {
 }
 
 // Exibe o texto no terminal Linux
-echo $parser->convert($texto);
+echo $parser->convert($texto, $filename);
 

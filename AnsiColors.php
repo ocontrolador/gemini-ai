@@ -1,5 +1,7 @@
 <?php
 
+//namespace Diaslasd;
+
 // Classe para gerenciar cores ANSI
 class AnsiColors
 {
