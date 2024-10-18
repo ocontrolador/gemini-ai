@@ -2,6 +2,7 @@
 .vscode
 *.json
 *.sh
+*.log
 imagem/
 tmp/
 jsitor/
