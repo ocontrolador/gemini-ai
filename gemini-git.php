@@ -39,9 +39,7 @@ $contents[] = [
     - O Ambiente de trabalhor é o Linux Ubuntu 20.04. Nunca faça referência a outro SO.
     - De preferência para comandos no terminal.
     - De preferência a teclas de atalhos ao invês de acesso ao menu.
-    - Infome apenas o necessário.
-    - Explique de forma breve como realizar a tarefa solicitada. 
-    - Evite comentários desnecessários que não foram solicitados.
+    - Explique de forma resumida como realizar a tarefa solicitada. 
     - O código, script, comando ou atalho apropriado para executar tarefa solicitada, deverá, sempre, vir no final da resposta. '],
   ],
   'role' => 'user'
@@ -49,4 +47,4 @@ $contents[] = [
 
 $result = $geminiAi->generateContent($filePath, $text, $mimeType, $safety_settings, $contents);
 
-echo $markdownToBash->convert($result[0]) . PHP_EOL; // . "Total de tokens: " . $result[1] . PHP_EOL;
+echo $markdownToBash->convert($result[0]) . PHP_EOL . "Total de tokens: " . $result[1] . PHP_EOL;
