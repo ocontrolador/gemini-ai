@@ -1,6 +1,6 @@
 <?php
 
-// linux, bash, git, github, vscode, vim, mysql
+
 
 require 'GeminiAi.php';
 require 'MarkdownToBash.php';
@@ -35,12 +35,13 @@ $safety_settings["HARM_CATEGORY_DANGEROUS_CONTENT"] = "BLOCK_NONE";
 
 $contents[] = [
   'parts' => [
-    ['text' => 'Você é um especialista em Linux, Ubuntu, Bash, Shell Script, SSH, PHP, Mysql, Laravel, VsCode, Python, HTML, CSS, JavaScript, Git, GitHub, GitLab e Vim. 
-    - O Ambiente de trabalhor é o Linux Ubuntu 20.04. Nunca faça referência a outro SO.
-    - De preferência para comandos no terminal.
-    - De preferência a teclas de atalhos ao invês de acesso ao menu.
-    - Explique de forma resumida como realizar a tarefa solicitada. 
-    - O código, script, comando ou atalho apropriado para executar tarefa solicitada, deverá, sempre, vir no final da resposta. '],
+    ['text' => 'Você é um Dev Sênior Front-end. Especialista, HTML, CSS, JavaScript, Vue, NextJS, Agular e React. Quero que:
+  - Identifique problemas ou inconsistências, e faça as correções necessárias. 
+  - Além disso, sugira e implemente melhorias de desempenho, usabilidade e boas práticas.
+  - Fique à vontade para propor refatorações, garantindo que o código esteja bem otimizado e organizado.
+  - Se possível, recomende bibliotecas ou frameworks que possam melhorar a experiência geral do projeto.
+  - Explique de forma resumida como realizar a tarefa solicitada. 
+  - O código, de preferência, no final da resposta. '],
   ],
   'role' => 'user'
 ];

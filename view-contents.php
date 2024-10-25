@@ -12,12 +12,17 @@ require_once 'autoload.php';
 
 $parser = new MarkdownToBash();
 
-$jsonFile = 'contents.json';
+// [opcional] salva código
 $filename = (isset($argv[1]))? $argv[1] : null;
 
 // Verifica se exite e carrega
-if (!file_exists($jsonFile)) 
-    die("'$jsonFile' não existe nesta pasta!\n");
+if (file_exists('.contents-gemini.json')) 
+    $jsonFile = '.contents-gemini.json';
+elseif (file_exists('contents.json')) 
+    $jsonFile = 'contents.json';
+else 
+    die("Aviso: Nenhum arquivo encontrado.\n");
+    
 $jsonConteudo = file_get_contents($jsonFile);
 
 // Converte o JSON para texto

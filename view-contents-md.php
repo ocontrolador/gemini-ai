@@ -6,12 +6,14 @@
 	Visualiza contents.json em markdown puro
 */
 
-
-$jsonFile = 'contents.json';
-
 // Verifica se exite e carrega
-if (!file_exists($jsonFile)) 
-    die("'$jsonFile' não existe nesta pasta!\n");
+if (file_exists('.contents-gemini.json')) 
+    $jsonFile = '.contents-gemini.json';
+elseif (file_exists('contents.json')) 
+    $jsonFile = 'contents.json';
+else 
+    die("Aviso: Nenhum arquivo encontrado.\n");
+
 $jsonConteudo = file_get_contents($jsonFile);
 
 // Converte o JSON para texto

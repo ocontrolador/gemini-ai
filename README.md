@@ -1,5 +1,6 @@
-# Gemini para terminal com PHP
+> 🤖 - ##  Gemini AI para terminal Linux com PHP
 
+[![GitHub license](https://img.shields.io/github/license/github_username/repo_name?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 ## Classes
 
@@ -29,5 +30,3 @@
 
 6. view-log.php
 > Visualiza os log
-
-

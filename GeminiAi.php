@@ -207,13 +207,14 @@ class GeminiAi
      */
     private function saveLogChat(string $text, array $contents, array $body): void
     {    
-        // Salva contents.json local. Usado no chat
+        // Salva contents local. Usado no chat
+        $fileContents = '.contents-gemini.json'; 
         array_push($contents, $body['candidates'][0]['content']);
-        file_put_contents('contents.json', json_encode($contents), 0);
+        file_put_contents($fileContents, json_encode($contents), 0);
 
         // Salva no log
-        $fileName = $this->limpaNomeArquivo($text);
-        file_put_contents($fileName, json_encode($contents), 0);
+        $fileLog = $this->limpaNomeArquivo($text);
+        file_put_contents($fileLog, json_encode($contents), 0);
     }
 
     /**
