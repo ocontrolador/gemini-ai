@@ -1,18 +1,18 @@
 ## 🤖  Gemini AI para terminal Linux com PHP
 
-[![GitHub license](https://img.shields.io/github/license/github_username/repo_name?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0.en.html)
+[![GitHub license](https://img.shields.io/github/license/ocontrolador/gemini-ai?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 [![PHP Version](https://img.shields.io/badge/PHP-8.3-blue?style=flat-square)](https://www.php.net/releases/8.3/en.php)
 [![Linux](https://img.shields.io/badge/OS-Linux-yellow?style=flat-square)](https://www.kernel.org/)
 [![Gemini](https://img.shields.io/badge/Gemini-compatible-blueviolet?style=flat-square)](https://gemini.csd.auth.gr/)
 
+
 ## Classes
 
 1. GeminiAi.php
-> Class principal que faz a conecção do o Gemini
+  + Class principal que faz a conecção do o Gemini
 
 2. MarkdownToBash.php
-> Converte de Markdonw para terminal linux
-
+  + Converte de Markdonw para terminal linux
 
 ## Códido PHP com Gemini-ai
 
