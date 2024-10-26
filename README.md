@@ -37,6 +37,9 @@
 7. gemini-revisa.php
 > Revisa um texto
 
+8. gemini-corrije.php
+> Corrige os erros de concordância, gramática e ortografia, do texto fornecido.
+
 ## View o arquivo gerado '*.contents-gemini.json*'
 
 1. view-gemini.php

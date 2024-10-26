@@ -12,11 +12,11 @@ array_shift($argv);
 
 // Verifica se é um novo chat ou carrega historico
 $contents = [];
-if ($argv[0] == '-n' || !file_exists('contents.json')) {
+if ($argv[0] == '-n' || !file_exists('.contents-gemini.json')) {
   $contents = [];
   array_shift($argv);  
 } else {
-  $contentsJson = file_get_contents('contents.json');
+  $contentsJson = file_get_contents('.contents-gemini.json');
   $contents = json_decode($contentsJson);
 }
 
