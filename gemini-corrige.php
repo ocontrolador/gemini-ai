@@ -61,8 +61,8 @@ $contents[] = [
   'role' => 'model'
 ];
 
-
-$result = $geminiAi->generateContent($filePath, $text, $mimeType, $safety_settings, $contents);
+// Gera o conteúdo usando a API Gemini
+$result = $geminiAi->generateContent($text, $mimeType, $safety_settings, $contents, $filePath);
 
 echo $markdownToBash->convert($result[0]) . "[{$result[1]} tokens]" . PHP_EOL;
 

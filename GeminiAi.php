@@ -23,18 +23,18 @@ class GeminiAi
     /**
      * Gera conteúdo usando a API Gemini.
      *
-     * @param string $filePath Caminho para um arquivo a ser anexado à requisição.
      * @param string $text Texto de entrada para gerar conteúdo.
      * @param string $mimeType Tipo MIME do arquivo, se aplicável.
      * @param array $safetySettings Configurações de segurança para o conteúdo gerado.
      * @param array $contents Conteúdo anterior da conversa.
      *
      * @return array Array contendo o conteúdo gerado e a contagem total de tokens.
+     * @param string $filePath Caminho para um arquivo a ser anexado à requisição.
      *
      * @throws InvalidArgumentException Se o texto de entrada ou o caminho do arquivo forem inválidos.
      * @throws RuntimeException Se ocorrer um erro de conexão ou um erro na resposta da API.
      */
-    public function generateContent(string $filePath = '', string $text, string $mimeType = '', array $safetySettings = [], array $contents = []): array
+    public function generateContent(string $text, string $mimeType = '', array $safetySettings = [], array $contents = [], string $filePath = ''): array
     {
         $model = "gemini-1.5-flash-latest";
 

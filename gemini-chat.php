@@ -45,8 +45,8 @@ $safety_settings["HARM_CATEGORY_HATE_SPEECH"] = "BLOCK_NONE";
 $safety_settings["HARM_CATEGORY_SEXUALLY_EXPLICIT"] = "BLOCK_NONE";
 $safety_settings["HARM_CATEGORY_DANGEROUS_CONTENT"] = "BLOCK_NONE";
 
-// Faz a consulta do Gemini
-$result = $geminiAi->generateContent($filePath, $text, $mimeType, $safety_settings, $contents);
+// Gera o conteúdo usando a API Gemini
+$result = $geminiAi->generateContent($text, $mimeType, $safety_settings, $contents, $filePath);
 
 // Visualiza o resultado, convertido do Markdown, no terminal do Linux
 $markdownToBash = new MarkdownToBash();

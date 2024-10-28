@@ -87,7 +87,7 @@ class MarkdownToBash
      * @param string $markdown O texto Markdown a ser convertido.
      * @return string O texto formatado para o terminal.
      */
-    public function convert(string $markdown, string $filename = null): string
+    public function convert(string $markdown, string $fileOut = null): string
     {
         if (strpos($markdown, '```') === false) {
             return $this->formatMarkdownString($markdown);
@@ -99,13 +99,13 @@ class MarkdownToBash
         foreach ($markdownArray as $key => $value) {
             if ($key % 2 == 1) {
               $bash .= "\n" . $this->colors::BG_BLACK . $this->colors::WHITE . '👾 ' . $value . $this->colors::RESET . "\n";
-              if (!is_null($filename)) file_put_contents($filename, $value, FILE_APPEND);
+              if (!is_null($fileOut)) file_put_contents($fileOut, $value);
             } else {
                 $bash .= $this->formatMarkdownString($value);
             }
         }
 
-        return $bash;
+        return (! $fileOut )? $bash: '';
     }
     
 
