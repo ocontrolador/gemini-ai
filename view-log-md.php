@@ -6,8 +6,6 @@
 	Mostra os log de Gemini em markdown puro
 */
 
-require 'dev-helpers.php';
-
 $diretorio = __DIR__ . '/log';
 
 // Validar a existência do diretório
@@ -24,6 +22,7 @@ usort($jsonFiles, fn($a, $b) => filemtime($b) - filemtime($a));
 $direto = (isset($argv[1]))? $argv[1] : '';
 if ($direto[0] == '+') {
   $opcao = substr($direto,1);
+  //dd($direto);
 } else {
 // Limitar a lista de arquivos visualizados
 $limiteDefault = 20;

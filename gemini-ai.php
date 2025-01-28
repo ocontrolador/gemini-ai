@@ -1,7 +1,7 @@
 <?php
 
-require 'GeminiAi.php';
-require 'MarkdownToBash.php';
+require_once __DIR__ . '/GeminiAi.php';
+require_once __DIR__ . '/MarkdownToBash.php';
 
 // Verifica se tem parametro
 if ($argc < 2) {
@@ -30,6 +30,19 @@ $safety_settings["HARM_CATEGORY_HATE_SPEECH"] = "BLOCK_NONE";
 $safety_settings["HARM_CATEGORY_SEXUALLY_EXPLICIT"] = "BLOCK_NONE";
 $safety_settings["HARM_CATEGORY_DANGEROUS_CONTENT"] = "BLOCK_NONE";
 
-$result = $geminiAi->generateContent($filePath, $text, $mimeType, $safety_settings);
+$contents[] = [
+  'parts' => [
+    ['text' => 'Você é um Guru da Informática. 
+    - Evite comentários desnecessários que não foram solicitados.'],
+  ],
+  'role' => 'user'
+];
 
-echo $markdownToBash->convert($result[0]) . PHP_EOL . "Total de tokens: " . $result[1] . PHP_EOL;
+// Gera o conteúdo usando a API Gemini
+echo "Processando...\n\n";
+$result = $geminiAi->generateContent($text, $mimeType, $safety_settings, $contents, $filePath);
+
+// Resposta da API Gemini
+$resposta = $result[0] . "\n[{$result[1]}] **Tokens**\n";
+echo $markdownToBash->convert($resposta);
+

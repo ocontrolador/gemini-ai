@@ -6,8 +6,8 @@
  * Data: 26/10/24
  */
 
-require 'GeminiAi.php';
-require 'MarkdownToBash.php';
+require_once __DIR__ . '/GeminiAi.php';
+require_once __DIR__ . '/MarkdownToBash.php';
 
 // Verifica se foi fornecida uma pergunta como argumento
 if ($argc < 2) {
@@ -83,8 +83,8 @@ Vou atuar como um Desenvolvedor PHP Sênior com vasta experiência em PHP, espec
 
 ## A resposta de saída será seguirá a **seguite formatação**:
   - [ Explicação resumida]
-  - [ Problemas encontrados ]
-  - [ Melhorias e soluções sugeridas ]
+  - [ Problemas encontrados ] (quando cabível)
+  - [ Melhorias e soluções sugeridas ] (quando cabível)
   - [ Nome do código final ]
   - [Código final]
     '],
@@ -93,6 +93,7 @@ Vou atuar como um Desenvolvedor PHP Sênior com vasta experiência em PHP, espec
 ];
 
 // Gera o conteúdo usando a API Gemini
+echo "Processando...\n\n";
 $result = $geminiAi->generateContent($text, $mimeType, $safety_settings, $contents, $filePath);
 
 // Imprime a resposta convertida para código bash e o número total de tokens usados

@@ -1,7 +1,7 @@
 <?php
 
-require 'GeminiAi.php';
-require 'MarkdownToBash.php';
+require_once __DIR__ . '/GeminiAi.php';
+require_once __DIR__ . '/MarkdownToBash.php';
 
 // Verifica se tem parametro
 if ($argc < 2)
@@ -46,6 +46,7 @@ $safety_settings["HARM_CATEGORY_SEXUALLY_EXPLICIT"] = "BLOCK_NONE";
 $safety_settings["HARM_CATEGORY_DANGEROUS_CONTENT"] = "BLOCK_NONE";
 
 // Gera o conteúdo usando a API Gemini
+echo "Processando...\n\n";
 $result = $geminiAi->generateContent($text, $mimeType, $safety_settings, $contents, $filePath);
 
 // Visualiza o resultado, convertido do Markdown, no terminal do Linux

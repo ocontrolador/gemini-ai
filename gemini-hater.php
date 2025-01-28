@@ -1,7 +1,7 @@
 <?php
 
-require 'GeminiAi.php';
-require 'MarkdownToBash.php';
+require_once __DIR__ . '/GeminiAi.php';
+require_once __DIR__ . '/MarkdownToBash.php';
 
 // Verifica se tem parametro
 if ($argc < 2) {
@@ -38,6 +38,11 @@ $contents[] = [
   'role' => 'user'
 ];
 
-$result = $geminiAi->generateContent($filePath, $text, $mimeType, $safety_settings, $contents);
+// Gera o conteúdo usando a API Gemini
+echo "Processando...\n";
+$result = $geminiAi->generateContent($text, $mimeType, $safety_settings, $contents, $filePath);
 
-echo $markdownToBash->convert($result[0]) . PHP_EOL . "Total de tokens: " . $result[1] . PHP_EOL;
+// Resposta da API Gemini
+$resposta = $result[0] . "\n[{$result[1]}] **Tokens**\n";
+echo $markdownToBash->convert($resposta);
+

@@ -1,7 +1,7 @@
 <?php 
 
-require 'GeminiAi.php';
-require 'MarkdownToBash.php';
+require_once __DIR__ . '/GeminiAi.php';
+require_once __DIR__ . '/MarkdownToBash.php';
 
 // Verifica se imagem foi inserida como parametro
 if ($argc < 2) {
@@ -30,6 +30,7 @@ $safety_settings["HARM_CATEGORY_HATE_SPEECH"] = "BLOCK_NONE";
 $safety_settings["HARM_CATEGORY_SEXUALLY_EXPLICIT"] = "BLOCK_NONE";
 $safety_settings["HARM_CATEGORY_DANGEROUS_CONTENT"] = "BLOCK_NONE";
 
+echo "Processando...\n\n";
 $result = $geminiAi->generateContent($filePath, $text, $mimeType, $safety_settings);
 
 echo $markdownToBash->convert($result[0]) . PHP_EOL . "Total de tokens: " . $result[1] . PHP_EOL;

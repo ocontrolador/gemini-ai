@@ -36,7 +36,7 @@ class GeminiAi
      */
     public function generateContent(string $text, string $mimeType = '', array $safetySettings = [], array $contents = [], string $filePath = ''): array
     {
-        $model = "gemini-1.5-flash-latest";
+        $model = "gemini-2.0-flash-exp"; //"gemini-1.5-flash-latest";
 
         if (empty($text)) {
             throw new InvalidArgumentException('Text cannot be empty.');

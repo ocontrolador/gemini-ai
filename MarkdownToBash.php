@@ -1,8 +1,6 @@
 <?php
 
-require_once 'autoload.php';
-
-//namespace Diaslasd;
+require_once __DIR__ . '/AnsiColors.php';
 
 // Classe para converter Markdown para texto formatado para o terminal
 class MarkdownToBash
